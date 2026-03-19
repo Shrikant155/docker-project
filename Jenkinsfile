@@ -1,4 +1,4 @@
- pipeline {
+pipeline {
     agent any
 
     environment {
@@ -6,12 +6,6 @@
     }
 
     stages {
-
-        stage('Clone') {
-            steps {
-                git 'https://github.com/Shrikant155/docker-project.git'
-            }
-        }
 
         stage('Build Image') {
             steps {
