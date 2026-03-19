@@ -1,15 +1,15 @@
-pipeline {
+ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB = "yourdockerhubusername/my-html-app"
+        DOCKER_HUB = "shrikant155/docker-project"
     }
 
     stages {
 
         stage('Clone') {
             steps {
-                git '<your-github-repo-url>'
+                git 'https://github.com/Shrikant155/docker-project.git'
             }
         }
 
