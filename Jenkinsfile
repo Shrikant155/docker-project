@@ -16,7 +16,7 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                sh 'docker build --no-cache -t $IMAGE_NAME:latest .'
             }
         }
 
@@ -44,6 +44,16 @@ pipeline {
         stage('Push Image') {
             steps {
                 sh 'docker push $IMAGE_NAME:latest'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                docker rm -f html-container || true
+                docker pull $IMAGE_NAME:latest
+                docker run -d -p 8081:80 --name html-container $IMAGE_NAME:latest
+                '''
             }
         }
     }
