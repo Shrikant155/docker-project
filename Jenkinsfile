@@ -2,32 +2,48 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB = "shrikant155/docker-project"
+        IMAGE_NAME = 'shrikant155/html-app'
+        DOCKERHUB_CREDENTIALS = 'dockerhub-cred-id'
     }
 
     stages {
 
-        stage('Build Image') {
+        stage('Checkout Code') {
             steps {
-                sh 'docker build -t $DOCKER_HUB .'
+                git branch: 'main', url: 'https://github.com/Shrikant155/docker-project.git'
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Build Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:latest .'
+            }
+        }
+
+        stage('Run Container (Test)') {
+            steps {
+                sh '''
+                docker rm -f html-container || true
+                docker run -d -p 8080:80 --name html-container $IMAGE_NAME:latest
+                '''
+            }
+        }
+
+        stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-cred',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
+                    credentialsId: "${DOCKERHUB_CREDENTIALS}",
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
         }
 
         stage('Push Image') {
             steps {
-                sh 'docker push $DOCKER_HUB'
+                sh 'docker push $IMAGE_NAME:latest'
             }
         }
     }
